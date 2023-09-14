@@ -1,5 +1,3 @@
-# SUPER IMPORTANT: Bu deployda aktif, bu repo private kalacak. Diger proje public olacak.
-
 # UFC-API
 
 The UFC API is a RESTful web service that provides information about various aspects of the Ultimate Fighting Championship (UFC), including fighters, fights, and more.
