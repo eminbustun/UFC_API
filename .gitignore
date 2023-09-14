@@ -1,0 +1,7 @@
+.vercel
+.env*
+.flaskenv*
+!.env.project
+.vault*
+config.env
+!.env.vault
