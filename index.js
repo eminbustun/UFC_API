@@ -7,16 +7,19 @@ const redis = require("redis");
 const redisConnector = require("./config/redis");
 const cors = require("cors");
 const { connectToRedis } = require("./config/redis");
+const errorHandler = require("./error/error-handler");
 
 //redisConnector.connectRedis(); //* Connecting to the redis
 
 //* Load env vars
 //* deployda burayı yoruma al
+
 /*
 dotenv.config({
   path: "./config/config.env",
 });
 */
+
 //? Connect to database
 connectDB();
 
@@ -51,7 +54,7 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 //app.listen(PORT, console.log(`Server running in ${process.env.PORT}`.yellow));
-
+app.use(errorHandler);
 const startServer = async () => {
   await app.listen(
     PORT,

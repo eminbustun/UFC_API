@@ -1,5 +1,6 @@
 const express = require("express");
 const FighterAndClub = require("../models/FighterAndClub");
+const ErrorResponse = require("../error/error-response");
 
 exports.getAllFighters = async (req, res, next) => {
   try {
@@ -8,10 +9,9 @@ exports.getAllFighters = async (req, res, next) => {
     }).populate("fighter", "name");
 
     if (!fighters) {
-      return res.status(400).json({
-        success: false,
-        error: "No fighter is found.",
-      });
+      return next(
+        new ErrorResponse("No fighter is found related to this club.", 400)
+      );
     }
 
     res.status(200).json({
@@ -20,8 +20,9 @@ exports.getAllFighters = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next(
+      "An error occured while getting the fighters who belongs to this club.",
+      400
+    );
   }
 };

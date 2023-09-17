@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const redis = require("redis");
 const redisUtils = require("../config/redis");
+const ErrorResponse = require("../error/error-response");
 
 //* Protect routes
 exports.protect = async (req, res, next) => {
@@ -21,10 +22,7 @@ exports.protect = async (req, res, next) => {
 
   //* Make sure token exists
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      error: "No token exists",
-    });
+    return next(new ErrorResponse("No token exists!", 400));
   }
 
   try {
@@ -35,20 +33,14 @@ exports.protect = async (req, res, next) => {
     // Use the value here
 
     if (value === null) {
-      return res.status(400).json({
-        message: "You are not authorized.",
-        success: false,
-      });
+      return next(new ErrorResponse("You are not authenticated.", 400));
     }
 
     req.user = await User.findById(decoded.id);
 
     next();
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: "error",
-    });
+    return next(new ErrorResponse(err, 400));
   }
 };
 
@@ -56,10 +48,12 @@ exports.protect = async (req, res, next) => {
 exports.authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(400).json({
-        success: false,
-        error: `User role ${req.user.role} is not authorized to access this route.`,
-      });
+      return next(
+        new ErrorResponse(
+          `User role ${req.user.role} is not authorized to access this route.`,
+          400
+        )
+      );
     }
     next();
   };

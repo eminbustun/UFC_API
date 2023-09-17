@@ -1,5 +1,6 @@
 const express = require("express");
 const FighterAndFight = require("../models/FighterAndFight");
+const ErrorResponse = require("../error/error-response");
 
 exports.getFightsOfFighter = async (req, res, next) => {
   try {
@@ -11,11 +12,8 @@ exports.getFightsOfFighter = async (req, res, next) => {
       fighter2: fighterId,
     }).populate("fight");
 
-    if (!fighterId) {
-      return res.status(400).json({
-        success: false,
-        message: "Fighter id cannot be found.",
-      });
+    if (!fightsWon || !fightsLost) {
+      return next(new ErrorResponse("No fights are found with this id."));
     }
 
     const allFights = [...fightsWon, ...fightsLost];
@@ -26,9 +24,11 @@ exports.getFightsOfFighter = async (req, res, next) => {
       allFights,
     });
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(
+      new ErrorResponse(
+        "An error occured while getting fights of a specific fighter.",
+        400
+      )
+    );
   }
 };

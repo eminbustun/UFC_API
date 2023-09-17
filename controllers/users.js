@@ -1,3 +1,4 @@
+const ErrorResponse = require("../error/error-response");
 const User = require("../models/User");
 
 //* Get All Users
@@ -5,11 +6,8 @@ exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find();
 
-    if (!users) {
-      return res.status(400).json({
-        success: false,
-        error: "No user is found.",
-      });
+    if (!users || users.length == 0) {
+      return next(new ErrorResponse("No fighters are found.", 400));
     }
 
     res.status(200).json({
@@ -17,10 +15,7 @@ exports.getUsers = async (req, res, next) => {
       data: users,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error occured while getting users.", 400));
   }
 };
 
@@ -30,10 +25,7 @@ exports.getUser = async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "No user is found.",
-      });
+      return next(new ErrorResponse("No user is found with this id.", 400));
     }
 
     res.status(200).json({
@@ -41,10 +33,7 @@ exports.getUser = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error occured while getting a user.", 400));
   }
 };
 
@@ -57,10 +46,7 @@ exports.addUser = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error occured while adding a user.", 400));
   }
 };
 
@@ -72,10 +58,7 @@ exports.updateUser = async (req, res, next) => {
       runValidators: true,
     });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "No user is found.",
-      });
+      return next(new ErrorResponse("No user is found with this id.", 400));
     }
 
     res.status(200).json({
@@ -83,10 +66,7 @@ exports.updateUser = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error occured while updating a user.", 400));
   }
 };
 
@@ -96,10 +76,7 @@ exports.deleteUser = async (req, res, next) => {
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "No user is found.",
-      });
+      return next(new ErrorResponse("No user is found with this id."), 400);
     }
 
     res.status(200).json({
@@ -107,9 +84,6 @@ exports.deleteUser = async (req, res, next) => {
       data: {},
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error occured while deleting a user.", 400));
   }
 };

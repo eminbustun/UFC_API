@@ -1,17 +1,15 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const Club = require("../models/Club");
+const ErrorResponse = require("../error/error-response");
 
 //* Get all clubs
 exports.getClubs = async (req, res, next) => {
   try {
     const clubs = await Club.find();
 
-    if (!clubs) {
-      return res.status(400).json({
-        success: false,
-        error: "No club is found.",
-      });
+    if (!clubs || clubs.length === 0) {
+      return next(new ErrorResponse("No club is found.", 400));
     }
 
     res.status(200).json({
@@ -20,9 +18,7 @@ exports.getClubs = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while getting the clubs.", 400);
   }
 };
 
@@ -32,10 +28,7 @@ exports.getClub = async (req, res, next) => {
     const club = await Club.findById(req.params.id);
 
     if (!club) {
-      return res.status(400).json({
-        success: false,
-        error: "No club is found.",
-      });
+      return next("No club is found with this id.", 400);
     }
     res.status(200).json({
       success: true,
@@ -43,9 +36,7 @@ exports.getClub = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while getting the specific club.", 400);
   }
 };
 
@@ -59,9 +50,7 @@ exports.addClub = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while adding a club.", 400);
   }
 };
 
@@ -74,10 +63,7 @@ exports.updateClub = async (req, res, next) => {
     });
 
     if (!club) {
-      return res.status(400).json({
-        success: false,
-        error: "No club is found.",
-      });
+      return next("No club is found with this id.", 400);
     }
     res.status(200).json({
       success: true,
@@ -85,9 +71,7 @@ exports.updateClub = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while updating a club.", 400);
   }
 };
 
@@ -96,10 +80,7 @@ exports.deleteClub = async (req, res, next) => {
     const club = await Club.findByIdAndDelete(req.params.id);
 
     if (!club) {
-      return res.status(400).json({
-        success: false,
-        error: "No club is found.",
-      });
+      return next("No club is found with this id.", 400);
     }
     res.status(200).json({
       success: true,

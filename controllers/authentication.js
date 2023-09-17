@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const User = require("../models/User");
 const sendMail = require("../utils/sendMail");
 const redis = require("redis");
+const ErrorResponse = require("../error/error-response");
 const {
   connectToRedis,
   getRedis,
@@ -37,10 +38,7 @@ exports.register = async (req, res, next) => {
       message: "You are registered.",
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next(err);
   }
 };
 
@@ -51,38 +49,30 @@ exports.login = async (req, res, next) => {
 
     //* Validate email and password
     if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        error: "Please provide email and password",
-      });
+      return next(new ErrorResponse("Please fill the missing values!", 400));
     }
 
     //* Check for user
     const user = await User.findOne({ email: email }).select("+password");
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid credentials.",
-      });
+      return next(
+        new ErrorResponse("No user is found with these credentials!", 400)
+      );
     }
 
     //* Check if password matches
     const isMatch = await matchPassword(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid credentials",
-      });
+      return next(new ErrorResponse("Wrong password!", 400));
     }
 
     sendTokenResponse(user, 200, res);
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    return next(
+      new ErrorResponse("Cannot login right now. Try again later", 400)
+    );
   }
 };
 
@@ -97,10 +87,12 @@ exports.logout = async (req, res, next) => {
       success: true,
     });
   } catch (err) {
-    return res.status(400).json({
-      message: "You are not logged out.",
-      success: false,
-    });
+    return next(
+      new ErrorResponse(
+        "You are not logged out. Something's wrong. Try again.",
+        400
+      )
+    );
   }
 };
 
@@ -119,10 +111,9 @@ exports.resetPassword = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid token.",
-      });
+      return next(
+        new ErrorResponse("No user found with this resetPasswordToken!", 400)
+      );
     }
 
     //* Set new password
@@ -149,9 +140,12 @@ exports.getMe = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-    });
+    return next(
+      new ErrorResponse(
+        "Error occured in showing your profile. Try again later.",
+        400
+      )
+    );
   }
 };
 
@@ -172,10 +166,7 @@ exports.updateDetails = async (req, res, next) => {
       data: user,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    return next(new ErrorResponse("Cannot update details.", 400));
   }
 };
 
@@ -186,18 +177,13 @@ exports.updatePassword = async (req, res, next) => {
 
     //* Check the current password
     if (!(await user.matchPassword(req.body.currentPassword))) {
-      return res.status(400).json({
-        success: false,
-      });
+      return next(new ErrorResponse("You entered a wrong password", 400));
     }
     user.password = req.body.newPassword;
     await user.save();
     sendTokenResponse(user, 200, res);
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      error: err,
-    });
+    return next(new ErrorResponse("Cannot update password.", 400));
   }
 };
 
@@ -207,10 +193,7 @@ exports.forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "There is no user with this email",
-      });
+      return next(new ErrorResponse("User cannot be found", 400));
     }
 
     //* Get reset token
@@ -238,14 +221,11 @@ exports.forgotPassword = async (req, res, next) => {
 
       await user.save({ validateBeforeSave: false });
 
-      return res.status(500).json({
-        success: false,
-        error: "Email could not be sent",
-      });
+      return next(new ErrorResponse("Email cannot be sent", 400));
     }
   } catch (err) {
-    res.status(400).json({
-      success: false,
-    });
+    return next(
+      new ErrorResponse("Forgot Password is not working. Try again later!")
+    );
   }
 };

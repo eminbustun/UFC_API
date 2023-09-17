@@ -5,3 +5,4 @@
 .vault*
 config.env
 !.env.vault
+node_modules

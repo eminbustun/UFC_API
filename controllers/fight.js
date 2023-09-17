@@ -3,6 +3,7 @@ const express = require("express");
 const Fight = require("../models/Fight");
 const FighterAndFight = require("../models/FighterAndFight");
 const Fighter = require("../models/Fighter");
+const ErrorResponse = require("../error/error-response");
 
 exports.getFights = async (req, res, next) => {
   try {
@@ -43,21 +44,15 @@ exports.getFights = async (req, res, next) => {
     }
 
     if (parseInt(page) === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Page number cannot be zero.",
-      });
+      return next(new ErrorResponse("Page number cannot be zero.", 400));
     }
 
     const fights = await Fight.find()
       .skip((page - 1) * count)
       .limit(count);
 
-    if (!fights) {
-      return res.status(400).json({
-        success: false,
-        error: "No fight is found.",
-      });
+    if (!fights || fights.length === 0) {
+      return next("No fight is found.", 400);
     }
 
     var hasNextPage = count * page < totalFightCount;
@@ -82,22 +77,17 @@ exports.getFights = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(404).json({
-      success: false,
-    });
+    next("An error occured while getting the fights.", 400);
   }
 };
 
-//* Get A Fighter
+//* Get A Fight
 exports.getFight = async (req, res, next) => {
   try {
     const fight = await Fight.findById(req.params.id);
 
     if (!fight) {
-      return res.status(400).json({
-        success: false,
-        error: "No fight is found.",
-      });
+      return next(new ErrorResponse("No fight is found with this id.", 400));
     }
 
     res.status(200).json({
@@ -105,13 +95,11 @@ exports.getFight = async (req, res, next) => {
       fight,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-    });
+    return next("An error occured while getting a specific fighter.", 400);
   }
 };
 
-//* Add a fighter
+//* Add a fight
 exports.addFight = async (req, res, next) => {
   try {
     const fight = await Fight.create(req.body);
@@ -121,13 +109,11 @@ exports.addFight = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while adding a fight,", 400);
   }
 };
 
-//* Update a fighter
+//* Update a fight
 exports.updateFight = async (req, res, next) => {
   try {
     const fight = await Fight.findByIdAndUpdate(req.params.id, req.body, {
@@ -136,10 +122,7 @@ exports.updateFight = async (req, res, next) => {
     });
 
     if (!fight) {
-      return res.status(400).json({
-        success: false,
-        error: "No fight is found.",
-      });
+      return next(new ErrorResponse("No fight is found with this id.", 400));
     }
 
     res.status(200).json({
@@ -148,9 +131,7 @@ exports.updateFight = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next("An error occured while updating a fight.", 400);
   }
 };
 
@@ -203,9 +184,6 @@ exports.addFightsAsAList = async (req, res, next) => {
       fights,
     });
   } catch (err) {
-    return res.status(400).json({
-      success: false,
-      error: err,
-    });
+    next("An error occured while adding fighters as a list.", 400);
   }
 };

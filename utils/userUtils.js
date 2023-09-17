@@ -52,7 +52,7 @@ exports.sendTokenResponse = async (user, statusCode, res) => {
 
   await setRedis(user.name, token);
   console.log("Written to the Redis");
-  return res.status(statusCode).cookie("token", token, options).json({
+  return res.status(statusCode).json({
     success: true,
     token,
   });

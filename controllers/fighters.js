@@ -4,6 +4,7 @@ const Fighter = require("../models/Fighter");
 const FighterAndClub = require("../models/FighterAndClub");
 const Club = require("../models/Club");
 const Fight = require("../models/Fight");
+const ErrorResponse = require("../error/error-response");
 
 //* Get All Fighters
 exports.getFighters = async (req, res, next) => {
@@ -17,10 +18,9 @@ exports.getFighters = async (req, res, next) => {
       const fighter = await Fighter.findOne({ name: name });
 
       if (!fighter) {
-        return res.status(400).json({
-          success: false,
-          error: "Fighters are not found.",
-        });
+        return next(
+          new ErrorResponse("Fighter cannot be found with this name.", 400)
+        );
       }
       return res.status(200).json({
         success: true,
@@ -29,21 +29,15 @@ exports.getFighters = async (req, res, next) => {
     }
 
     if (parseInt(page) === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Page number cannot be zero.",
-      });
+      return next(new ErrorResponse("Page number cannot be zero", 400));
     }
 
     const fighters = await Fighter.find()
       .skip((page - 1) * count)
       .limit(count);
 
-    if (!fighters) {
-      return res.status(404).json({
-        success: false,
-        error: "Fighters are not found.",
-      });
+    if (!fighters || fighters.length === 0) {
+      return next(new ErrorResponse("No fighter is found.", 400));
     }
 
     var hasNextPage = count * page < totalFighterCount;
@@ -67,10 +61,7 @@ exports.getFighters = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(404).json({
-      success: false,
-      error: err,
-    });
+    next(new ErrorResponse("An error is occured while getting fighters"));
   }
 };
 
@@ -80,10 +71,7 @@ exports.getFighter = async (req, res, next) => {
     const fighter = await Fighter.findById(req.params.id);
 
     if (!fighter) {
-      return res.status(400).json({
-        success: false,
-        error: "Fighter is not found.",
-      });
+      return next(new ErrorResponse("No fighter is found with this id."));
     }
 
     res.status(200).json({
@@ -91,9 +79,7 @@ exports.getFighter = async (req, res, next) => {
       fighter,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-    });
+    next(new ErrorResponse("An error occured while getting a fighter.", 400));
   }
 };
 
@@ -117,9 +103,7 @@ exports.addFighter = async (req, res, next) => {
       });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next(new ErrorResponse("An error occured while adding a fighter.", 400));
   }
 };
 
@@ -145,9 +129,12 @@ exports.addFighterList = async (req, res, next) => {
       });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next(
+      new ErrorResponse(
+        "An error occured while adding fighters as a list.",
+        400
+      )
+    );
   }
 };
 
@@ -160,10 +147,7 @@ exports.updateFighter = async (req, res, next) => {
     });
 
     if (!fighter) {
-      return res.status(400).json({
-        success: false,
-        error: "Fighter is not found.",
-      });
+      return next(new ErrorResponse("No fighter is found with this id.", 400));
     }
 
     res.status(200).json({
@@ -172,9 +156,7 @@ exports.updateFighter = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next(new ErrorResponse("An error occured in updating a fighter.", 400));
   }
 };
 
@@ -184,10 +166,7 @@ exports.deleteFighter = async (req, res, next) => {
     const fighter = await Fighter.findByIdAndDelete(req.params.id);
 
     if (!fighter) {
-      return res.status(400).json({
-        success: false,
-        error: "Fighter is not found.",
-      });
+      return next(new ErrorResponse("No fighter is found with this id", 400));
     }
     //! buraya if(!fighter eklenecek)
     res.status(200).json({
@@ -196,12 +175,11 @@ exports.deleteFighter = async (req, res, next) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      success: false,
-    });
+    next(new ErrorResponse("An error occured while deleting a fighter.", 400));
   }
 };
 
+/*
 exports.searchFighter = async (req, res, next) => {
   try {
     const fighters = await Fighter.find({ name: req.params.name });
@@ -223,3 +201,4 @@ exports.searchFighter = async (req, res, next) => {
     });
   }
 };
+*/
