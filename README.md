@@ -16,6 +16,10 @@ The UFC API allows developers to access a wide range of data related to UFC figh
 
 Detailed information about endpoints is in the Postman Document.
 
+## Important Note
+
+There are routes that uses id's of fighters. In these routes, please do not use fighter_id variable of the fighten instance, use the \_id.
+
 ## Support
 
 If you encounter any issues, have questions, or have legal issue ,please contact me at beminustun2@gmail.com.
