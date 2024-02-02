@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
 const FighterAndFightSchema = new mongoose.Schema({
-  fighter1: {
+  fighter1ID: {
     type: mongoose.Schema.ObjectId,
     ref: "Fighter",
   },
-  fighter2: {
+
+  fighter2ID: {
     type: mongoose.Schema.ObjectId,
     ref: "Fighter",
   },

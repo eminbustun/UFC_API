@@ -2,13 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const {
-  connectToRedis,
-  getRedis,
-  removeRedis,
-  setRedis,
-} = require("../config/redis");
+
 const crypto = require("crypto");
+const User = require("../models/User");
 
 //* Sign JWT and return
 getSignedJwtToken = function (userId) {
@@ -50,9 +46,9 @@ exports.sendTokenResponse = async (user, statusCode, res) => {
     httpOnly: true, //? An HttpOnly Cookie is a tag added to a browser cookie that prevents client-side scripts from accessing data.
   };
 
-  await setRedis(user.name, token);
-  console.log("Written to the Redis");
-  return res.status(statusCode).json({
+  await User.findByIdAndUpdate(user.id, { jwtToken: token });
+
+  return res.status(statusCode).cookie("token", token, options).json({
     success: true,
     token,
   });

@@ -6,10 +6,10 @@ exports.getFightsOfFighter = async (req, res, next) => {
   try {
     const fighterId = req.params.id;
     const fightsWon = await FighterAndFight.find({
-      fighter1: fighterId,
+      fighter1ID: fighterId,
     }).populate("fight");
     const fightsLost = await FighterAndFight.find({
-      fighter2: fighterId,
+      fighter2ID: fighterId,
     }).populate("fight");
 
     if (!fightsWon || !fightsLost) {
@@ -24,6 +24,7 @@ exports.getFightsOfFighter = async (req, res, next) => {
       allFights,
     });
   } catch (err) {
+    S;
     next(
       new ErrorResponse(
         "An error occured while getting fights of a specific fighter.",

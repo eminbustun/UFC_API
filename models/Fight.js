@@ -10,6 +10,12 @@ const FightSchema = new mongoose.Schema({
   location: {
     type: String,
   },
+  fighter1ID: {
+    type: String,
+  },
+  fighter2ID: {
+    type: String,
+  },
   fighter1: {
     type: String,
   },

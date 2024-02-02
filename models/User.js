@@ -23,6 +23,9 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  jwtToken: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ["admin", "normal"], //* admin can add fighters..., user can comment, normal cannot comment or add

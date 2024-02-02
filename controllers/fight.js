@@ -140,40 +140,16 @@ exports.addFightsAsAList = async (req, res, next) => {
     const fights = await Fight.create(req.body);
 
     for (let index = 0; index < fights.length; index++) {
-      const fighter1 = await Fighter.findOne({ name: fights[index].fighter1 });
-      const fighter2 = await Fighter.findOne({ name: fights[index].fighter2 });
+      const fighter1 = await Fighter.findOne({
+        fighter_id: fights[index].fighter1ID,
+      });
+      const fighter2 = await Fighter.findOne({
+        fighter_id: fights[index].fighter2ID,
+      });
 
-      var firstFighterId;
-      var secondFighterId;
-
-      if (fighter1 && fighter2) {
-        firstFighterId = fighter1.id;
-        secondFighterId = fighter2.id;
-      } else if (fighter1 && !fighter2) {
-        firstFighterId = fighter1.id;
-        const newFighter2 = await Fighter.create({
-          name: fights[index].fighter2,
-        });
-        secondFighterId = newFighter2.id;
-      } else if (!fighter1 && fighter2) {
-        const newFighter1 = await Fighter.create({
-          name: fights[index].fighter1,
-        });
-        firstFighterId = newFighter1.id;
-        secondFighterId = fighter2;
-      } else if (!fighter1 && !fighter2) {
-        const newFighter1 = await Fighter.create({
-          name: fights[index].fighter1,
-        });
-        firstFighterId = newFighter1.id;
-        const newFighter2 = await Fighter.create({
-          name: fights[index].fighter2,
-        });
-        secondFighterId = newFighter2.id;
-      }
       await FighterAndFight.create({
-        fighter1: firstFighterId,
-        fighter2: secondFighterId,
+        fighter1ID: fighter1.id,
+        fighter2ID: fighter2.id,
         fight: fights[index].id,
       });
     }

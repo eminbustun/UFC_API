@@ -1,14 +1,8 @@
 const crypto = require("crypto");
 const User = require("../models/User");
 const sendMail = require("../utils/sendMail");
-const redis = require("redis");
 const ErrorResponse = require("../error/error-response");
-const {
-  connectToRedis,
-  getRedis,
-  removeRedis,
-  setRedis,
-} = require("../config/redis");
+
 const bcrypt = require("bcryptjs");
 
 const {
@@ -81,9 +75,12 @@ exports.logout = async (req, res, next) => {
   try {
     //console.log(req.user);
 
-    await removeRedis(req.user.name);
-    return res.status(200).json({
-      message: "You successfully logged out.",
+    res.cookie("token", "none", {
+      expires: new Date(Date.now() + 10 * 1000),
+      httpOnly: true,
+    });
+
+    res.status(200).json({
       success: true,
     });
   } catch (err) {
